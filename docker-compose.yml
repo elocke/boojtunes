@@ -1,0 +1,38 @@
+icecast:
+  build: icecast/.
+  volumes:
+  - ./icecast/logs:/var/log/icecast2
+  - /etc/localtime:/etc/localtime:ro
+  - ./icecast/conf:/etc/icecast2
+  environment:
+  - ICECAST_SOURCE_PASSWORD=aaa
+  - ICECAST_ADMIN_PASSWORD=bbb
+  - ICECAST_PASSWORD=ccc
+  - ICECAST_RELAY_PASSWORD=ddd
+  ports:
+  - 8000:8000
+  command: supervisord -n -c /etc/supervisord.conf
+  
+liquidsoap:
+  build: liquidsoap/.
+  volumes:
+  - /etc/localtime:/etc/localtime:ro
+  ports:
+  - 8800:8800
+  
+mopidy:
+  build: mopidy/.
+  volumes:
+  - ./mopidy/media:/var/lib/mopidy/media:ro
+  - ./mopidy/local:/var/lib/mopidy/local
+  - ./mopidy/conf:/app
+  environment:
+  - PULSE_SERVER=tcp:192.168.7.88:4713
+#  - PULSE_COOKIE_DATA=$(pax11publish -d | grep --color=never -Po '(?<=^Cookie: ).*')
+  ports:
+  - 6600:6600
+  - 6680:6680
+  links:
+  - icecast
+  - liquidsoap
+  command: /usr/bin/mopidy --config /app/mopidy.conf -o soundcloud/auth_token=1-35204-215559950-dcffd789254946 -o spotify/username=boojtunes -o spotify/password=webmen22
